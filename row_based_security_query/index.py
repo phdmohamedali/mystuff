@@ -55,7 +55,7 @@ test_cases = [
     FROM x.customers 
     JOIN x.orders b ON a.id = b.customer_id
     """,
-    """
+    f"""
     SELECT a.id, b.name
     FROM (SELECT * FROM x.customers WHERE company_id = {para_company_id}) as customers
     JOIN (SELECT * FROM x.orders WHERE company_id = {para_company_id}) as b ON a.id = b.customer_id
@@ -70,8 +70,8 @@ test_cases = [
     """,
     f"""
     SELECT COUNT(*) AS count3, 
-        (SELECT COUNT(*) FROM (SELECT * FROM table2 WHERE company_id = {para_company_id})) AS count4
-    FROM (SELECT * FROM table1 WHERE company_id = {para_company_id})
+        (SELECT COUNT(*) FROM (SELECT * FROM table2 WHERE company_id = {para_company_id}) AS table2) AS count4
+    FROM (SELECT * FROM table1 WHERE company_id = {para_company_id}) as table1
     """),
 
     # # Multiple tables in FROM clause
@@ -127,5 +127,3 @@ for i, (input_sql, expected_sql) in enumerate(test_cases, 1):
     print("Transformed SQL:\n", normalize_sql(transformed_sql))
     print("Expected SQL:\n", normalize_sql(expected_sql))
     print("=" * 80)
-    if i == 3:
-        break

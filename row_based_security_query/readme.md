@@ -1,4 +1,4 @@
-# Simple Way to prvoide Row Level Security for AI-Generated SQL
+# Simple Way to provide Row Level Security for AI-Generated SQL
 
 ## Overview
 
