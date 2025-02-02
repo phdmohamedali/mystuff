@@ -2,10 +2,11 @@ import sqlglot
 from sqlglot import parse_one
 from sqlglot.expressions import Table, Subquery, Alias
 
+para_company_id = 3
 def wrap_table_with_filter(expression):
     """
     Recursively traverse the SQL AST and replace table references
-    with a subquery that filters by company_id = 1.
+    with a subquery that filters by company_id = {para_company_id}.
     Preserve schema qualification.
     """
     if isinstance(expression, Table):
@@ -13,7 +14,7 @@ def wrap_table_with_filter(expression):
         schema_name = expression.db or ""  # Ensure schema is correctly preserved
         full_table_name = f"{schema_name}.{table_name}" if schema_name else table_name
         
-        subquery = Subquery(this=parse_one(f"SELECT * FROM {full_table_name} WHERE company_id = 1"))
+        subquery = Subquery(this=parse_one(f"SELECT * FROM {full_table_name} WHERE company_id = {para_company_id}"))
         
         return Alias(this=subquery, alias=expression.alias or table_name)
     
@@ -43,10 +44,10 @@ def normalize_sql(sql):
 test_cases = [
     # Simple FROM clause
     ("SELECT * FROM dataset.customers", 
-     "SELECT * FROM (SELECT * FROM dataset.customers WHERE company_id = 1) as customers"),
+     f"SELECT * FROM (SELECT * FROM dataset.customers WHERE company_id = {para_company_id}) as customers"),
    
-    ("SELECT count(*)/count(select count(x) from dataset.x WHERE company_id = 1) FROM dataset.customers", 
-     "SELECT count(*)/count(select count(x) from (select * from dataset.x WHERE company_id = 1) as x where  company_id = 1) FROM  (select * from dataset.customers WHERE company_id = 1) as customers"),
+    (f"SELECT count(*)/count(select count(x) from dataset.x WHERE company_id = {para_company_id}) FROM dataset.customers", 
+     f"SELECT count(*)/count(select count(x) from (select * from dataset.x WHERE company_id = {para_company_id}) as x where  company_id = {para_company_id}) FROM  (select * from dataset.customers WHERE company_id = {para_company_id}) as customers"),
     
     # JOINs with alias
     ("""
@@ -56,8 +57,8 @@ test_cases = [
     """,
     """
     SELECT a.id, b.name
-    FROM (SELECT * FROM x.customers WHERE company_id = 1) as customers
-    JOIN (SELECT * FROM x.orders WHERE company_id = 1) as b ON a.id = b.customer_id
+    FROM (SELECT * FROM x.customers WHERE company_id = {para_company_id}) as customers
+    JOIN (SELECT * FROM x.orders WHERE company_id = {para_company_id}) as b ON a.id = b.customer_id
     """),
 
     # Subquery in SELECT clause
@@ -67,11 +68,10 @@ test_cases = [
         (SELECT COUNT(*) FROM table2) AS count4
     FROM table1
     """,
-    """
-    SELECT 
-        COUNT(*) AS count3, 
-        (SELECT COUNT(*) FROM (SELECT * FROM table2 WHERE company_id = 1)) AS count4
-    FROM (SELECT * FROM table1 WHERE company_id = 1)
+    f"""
+    SELECT COUNT(*) AS count3, 
+        (SELECT COUNT(*) FROM (SELECT * FROM table2 WHERE company_id = {para_company_id})) AS count4
+    FROM (SELECT * FROM table1 WHERE company_id = {para_company_id})
     """),
 
     # # Multiple tables in FROM clause
