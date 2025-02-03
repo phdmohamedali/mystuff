@@ -2,7 +2,7 @@
 
 ## Overview
 
-This source code provides a solution for securing AI generated SQL queries used in web applications by ensuring they only access data related to a specific company, identified by `company_id = {company_id comming from session}`. This script rewrites SQL queries by wrapping all table references with subqueries that filter results based on the `company_id` field.
+This source code provides a solution for securing AI generated SQL queries used in web applications by ensuring they only access data related to a specific company, identified by `company_id = {company_id comming from session}`. This script rewrites SQL queries by wrapping all table references with subqueries that filter results based on the `company_id` field. Ideally this script needs to set at serverside.
 
 The solution is implemented using the `sqlglot` library to parse, modify, and regenerate SQL queries. It supports both basic SQL queries and more complex ones with joins, subqueries, and aliases. The transformation ensures that the queries are secure and scoped to a single company, preventing unauthorized access to data.
 
